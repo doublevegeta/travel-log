@@ -1,0 +1,1324 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0F6E5C">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icon.png" type="image/png">
+<link rel="apple-touch-icon" href="./icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="隨行手帳">
+<meta name="description" content="旅程行程、記帳分帳、匯率換算與每日行事曆。資料只存在自己的裝置。">
+<title>隨行手帳</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#F4F6F2; --surface:#FFFFFF; --surface-2:#FAFBF8;
+  --ink:#18211D; --ink-2:#3C4A44; --muted:#5E6B64; --faint:#8B9791;
+  --line:#DEE4DD; --line-strong:#C6D0C8;
+  --accent:#0F6E5C; --accent-ink:#0B564A; --accent-soft:#DCEAE4;
+  --warn:#B4632A; --warn-soft:#F6E7D8;
+  --danger:#A63A33; --danger-soft:#F7E2DF;
+  --shadow:0 1px 2px rgba(24,33,29,.05), 0 8px 24px -16px rgba(24,33,29,.18);
+  --r:10px;
+  --f-body:"Noto Sans TC",-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft JhengHei",sans-serif;
+  --f-disp:"Noto Serif TC",Georgia,"Songti TC",serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#111614; --surface:#19201D; --surface-2:#1E2622;
+    --ink:#E7EDE8; --ink-2:#C4CFC9; --muted:#98A69F; --faint:#77857E;
+    --line:#29332F; --line-strong:#3A453F;
+    --accent:#4FBFA3; --accent-ink:#7FD5BE; --accent-soft:#1D2E28;
+    --warn:#D68A4C; --warn-soft:#33261A;
+    --danger:#DB7A72; --danger-soft:#341F1D;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px -16px rgba(0,0,0,.6);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#111614; --surface:#19201D; --surface-2:#1E2622;
+  --ink:#E7EDE8; --ink-2:#C4CFC9; --muted:#98A69F; --faint:#77857E;
+  --line:#29332F; --line-strong:#3A453F;
+  --accent:#4FBFA3; --accent-ink:#7FD5BE; --accent-soft:#1D2E28;
+  --warn:#D68A4C; --warn-soft:#33261A;
+  --danger:#DB7A72; --danger-soft:#341F1D;
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px -16px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:var(--f-body); font-size:15px; line-height:1.65;
+  -webkit-text-size-adjust:100%;
+}
+h1,h2,h3{font-family:var(--f-disp); font-weight:700; text-wrap:balance; margin:0; line-height:1.3}
+.mono{font-family:var(--f-mono); font-variant-numeric:tabular-nums}
+.eyebrow{
+  font-family:var(--f-mono); font-size:10.5px; font-weight:500;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--faint);
+}
+button,input,select,textarea{font:inherit; color:inherit}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:4px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important}}
+
+.wrap{max-width:960px; margin:0 auto; padding:0 16px 72px}
+
+/* ---------- boarding-pass header ---------- */
+.pass{
+  position:relative; background:var(--surface); border:1px solid var(--line);
+  border-bottom:none; border-radius:var(--r) var(--r) 0 0;
+  margin-top:16px; padding:18px 20px 20px;
+}
+.pass::after{
+  content:""; position:absolute; left:0; right:0; bottom:-1px; height:2px;
+  background:repeating-linear-gradient(90deg,var(--line-strong) 0 6px,transparent 6px 12px);
+}
+.pass-top{display:flex; flex-wrap:wrap; gap:14px 20px; align-items:flex-end; justify-content:space-between}
+.trip-name{font-size:26px; letter-spacing:-.01em}
+.trip-name input{
+  font:inherit; font-family:var(--f-disp); font-weight:700; background:none; border:none;
+  padding:0; width:100%; max-width:420px;
+}
+.trip-meta{display:flex; gap:18px; flex-wrap:wrap; margin-top:6px}
+.trip-meta > div{display:flex; flex-direction:column; gap:1px}
+.trip-meta .v{font-family:var(--f-mono); font-size:13.5px; color:var(--ink-2); font-variant-numeric:tabular-nums}
+.pass-right{display:flex; gap:10px; align-items:center}
+.badge{
+  display:inline-flex; align-items:center; gap:6px; padding:4px 9px; border-radius:99px;
+  font-family:var(--f-mono); font-size:11px; letter-spacing:.04em;
+  background:var(--accent-soft); color:var(--accent-ink);
+}
+.badge.grey{background:var(--surface-2); color:var(--muted); border:1px solid var(--line)}
+.dot{width:6px; height:6px; border-radius:50%; background:currentColor}
+
+/* ---------- tabs ---------- */
+.tabbar{
+  position:sticky; top:0; z-index:30; background:var(--bg);
+  padding:12px 0 10px; margin:0 0 4px;
+}
+.tabs{
+  display:flex; gap:2px; background:var(--surface); border:1px solid var(--line);
+  border-radius:99px; padding:3px; box-shadow:var(--shadow);
+}
+.tabs button{
+  flex:1; border:none; background:none; padding:8px 6px; border-radius:99px;
+  font-size:14px; font-weight:500; color:var(--muted); cursor:pointer;
+  transition:background .15s, color .15s; white-space:nowrap;
+}
+.tabs button[aria-selected="true"]{background:var(--accent); color:#fff}
+:root[data-theme="dark"] .tabs button[aria-selected="true"],
+.tabs button[aria-selected="true"]{color:#fff}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]) .tabs button[aria-selected="true"]{background:var(--accent); color:#0F1A17}
+}
+:root[data-theme="dark"] .tabs button[aria-selected="true"]{background:var(--accent); color:#0F1A17}
+
+/* ---------- panels ---------- */
+.panel{background:var(--surface); border:1px solid var(--line); border-radius:var(--r); margin-bottom:14px}
+.panel-h{
+  display:flex; align-items:baseline; justify-content:space-between; gap:12px;
+  padding:14px 16px 10px;
+}
+.panel-h h2{font-size:16px}
+.panel-b{padding:0 16px 16px}
+.hint{font-size:12.5px; color:var(--muted); line-height:1.55}
+
+/* ---------- controls ---------- */
+.btn{
+  border:1px solid var(--line-strong); background:var(--surface); color:var(--ink);
+  padding:7px 13px; border-radius:8px; font-size:13.5px; font-weight:500; cursor:pointer;
+  transition:border-color .15s, background .15s;
+}
+.btn:hover{border-color:var(--accent); color:var(--accent-ink)}
+.btn.primary{background:var(--accent); border-color:var(--accent); color:#fff}
+.btn.primary:hover{background:var(--accent-ink); color:#fff}
+.btn.sm{padding:4px 9px; font-size:12.5px; border-radius:6px}
+.btn.ghost{border-color:transparent; background:none; color:var(--muted)}
+.btn.ghost:hover{color:var(--danger); border-color:var(--danger)}
+.field{display:flex; flex-direction:column; gap:4px}
+.field label{font-family:var(--f-mono); font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--faint)}
+input[type=text],input[type=number],input[type=date],input[type=time],select,textarea{
+  background:var(--surface-2); border:1px solid var(--line); border-radius:8px;
+  padding:7px 9px; font-size:14px; width:100%;
+}
+input[type=number]{font-family:var(--f-mono); font-variant-numeric:tabular-nums}
+textarea{resize:vertical; min-height:38px}
+.grid{display:grid; gap:10px}
+.chipset{display:flex; flex-wrap:wrap; gap:6px}
+.chip{
+  border:1px solid var(--line); background:var(--surface-2); color:var(--ink-2);
+  padding:4px 10px; border-radius:99px; font-size:12.5px; cursor:pointer;
+}
+.chip[aria-pressed="true"]{background:var(--accent-soft); border-color:var(--accent); color:var(--accent-ink)}
+
+/* ---------- day rail ---------- */
+.rail{display:flex; gap:8px; overflow-x:auto; padding:2px 16px 12px; scrollbar-width:thin}
+.day-chip{
+  flex:0 0 auto; border:1px solid var(--line); background:var(--surface-2);
+  border-radius:9px; padding:8px 12px; cursor:pointer; text-align:left; min-width:92px;
+}
+.day-chip[aria-pressed="true"]{border-color:var(--accent); background:var(--accent-soft)}
+.day-chip .n{font-family:var(--f-mono); font-size:10.5px; letter-spacing:.12em; color:var(--faint)}
+.day-chip[aria-pressed="true"] .n{color:var(--accent-ink)}
+.day-chip .d{font-family:var(--f-mono); font-size:14px; font-weight:500; font-variant-numeric:tabular-nums}
+.day-chip .w{font-size:11.5px; color:var(--muted)}
+
+/* ---------- timeline ---------- */
+.tl{list-style:none; margin:0; padding:0}
+.tl li{
+  display:grid; grid-template-columns:56px 1fr; gap:12px;
+  padding:12px 0; border-top:1px solid var(--line); position:relative;
+}
+.tl li:first-child{border-top:none}
+.tl .when{font-family:var(--f-mono); font-size:13px; color:var(--accent-ink); font-variant-numeric:tabular-nums; padding-top:1px}
+.tl .body{min-width:0}
+.tl .nm{font-weight:500; font-size:15.5px; word-break:break-word}
+.tl .sub{font-size:12.5px; color:var(--muted); word-break:break-word}
+.tl .acts{display:flex; gap:6px; flex-wrap:wrap; margin-top:7px}
+.cat-tag{
+  display:inline-block; font-family:var(--f-mono); font-size:10.5px; letter-spacing:.08em;
+  padding:1px 7px; border-radius:99px; border:1px solid var(--line); color:var(--muted); margin-left:8px;
+  vertical-align:1px;
+}
+.empty{padding:26px 4px; text-align:center; color:var(--muted); font-size:13.5px}
+
+/* ---------- map ---------- */
+.mapbox{border:1px solid var(--line); border-radius:9px; overflow:hidden; background:var(--surface-2)}
+.mapbox iframe{display:block; width:100%; height:340px; border:0; background:var(--surface-2)}
+.map-note{padding:10px 12px; font-size:12.5px; color:var(--muted); border-top:1px solid var(--line)}
+.stoplist{list-style:none; margin:10px 0 0; padding:0; display:flex; flex-direction:column; gap:1px}
+.stoplist li{display:flex; gap:10px; align-items:center; padding:8px 0; border-top:1px solid var(--line)}
+.stoplist .idx{
+  flex:0 0 22px; height:22px; border-radius:50%; background:var(--accent-soft); color:var(--accent-ink);
+  font-family:var(--f-mono); font-size:11.5px; display:grid; place-items:center;
+}
+.stoplist .t{flex:1; min-width:0; font-size:14px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+a.maplink{color:var(--accent-ink); font-size:12.5px; text-decoration:none; border-bottom:1px solid var(--accent-soft); white-space:nowrap}
+a.maplink:hover{border-bottom-color:var(--accent)}
+
+/* ---------- stat tiles ---------- */
+.tiles{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; padding:0 16px 14px}
+.tile{border:1px solid var(--line); border-radius:9px; padding:12px 13px; background:var(--surface-2)}
+.tile .k{font-family:var(--f-mono); font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--faint)}
+.tile .v{font-family:var(--f-mono); font-size:24px; font-weight:600; font-variant-numeric:tabular-nums; letter-spacing:-.02em; line-height:1.25}
+.tile .s{font-size:12px; color:var(--muted)}
+.tile.over{border-color:var(--danger); background:var(--danger-soft)}
+.tile.over .v{color:var(--danger)}
+.meter{height:5px; border-radius:99px; background:var(--line); overflow:hidden; margin-top:8px}
+.meter i{display:block; height:100%; background:var(--accent); border-radius:99px}
+.meter i.over{background:var(--danger)}
+
+/* ---------- expense rows ---------- */
+.exp-day{border-top:1px solid var(--line); padding:10px 0 4px}
+.exp-day:first-child{border-top:none}
+.exp-day-h{display:flex; justify-content:space-between; align-items:baseline; gap:10px}
+.exp-day-h .dt{font-family:var(--f-mono); font-size:12.5px; color:var(--muted)}
+.exp-day-h .sum{font-family:var(--f-mono); font-size:13px; font-variant-numeric:tabular-nums}
+.exp{display:grid; grid-template-columns:1fr auto auto; gap:8px 12px; align-items:center; padding:7px 0}
+.exp .nm{font-size:14.5px; min-width:0; word-break:break-word}
+.exp .who{font-size:12px; color:var(--muted)}
+.exp .amt{font-family:var(--f-mono); font-size:14px; font-variant-numeric:tabular-nums; text-align:right; white-space:nowrap}
+.exp .amt small{display:block; font-size:11px; color:var(--muted)}
+
+/* ---------- charts ---------- */
+.barrow{display:grid; grid-template-columns:64px 1fr 92px; gap:10px; align-items:center; padding:5px 0}
+.barrow .lbl{font-size:13px; color:var(--ink-2)}
+.bartrackwrap{position:relative}
+.bartrack{height:14px; background:var(--surface-2); border-radius:4px; overflow:hidden}
+.bartrack i{display:block; height:100%; background:var(--accent); border-radius:0 4px 4px 0}
+.barrow .val{font-family:var(--f-mono); font-size:12.5px; text-align:right; font-variant-numeric:tabular-nums; color:var(--ink-2)}
+.barrow .val em{font-style:normal; color:var(--faint); font-size:11px}
+
+.daychart{overflow-x:auto; padding-top:18px}
+.dcbars,.dcticks{
+  display:grid; grid-auto-flow:column; grid-auto-columns:minmax(22px,42px);
+  justify-content:start; gap:7px;
+}
+.dcbars{align-items:end; height:112px; position:relative}
+.dcbars .col{height:100%; display:flex; align-items:flex-end; position:relative}
+.dcbars .bar{width:100%; background:var(--accent); border-radius:4px 4px 0 0; min-height:2px; transition:filter .15s}
+.dcbars .col:hover .bar{filter:brightness(1.08)}
+.dcbars .bar.over{background:var(--danger)}
+.dcticks{margin-top:5px}
+.dcticks .tick{font-family:var(--f-mono); font-size:9.5px; color:var(--faint); text-align:center; white-space:nowrap}
+.budgetline{position:absolute; left:0; right:0; border-top:1.5px dashed var(--warn); pointer-events:none; z-index:2}
+.budgetline span{
+  position:absolute; right:0; top:-15px; font-family:var(--f-mono); font-size:10px;
+  color:var(--warn); background:var(--surface); padding:0 3px;
+}
+.tip{
+  position:absolute; bottom:calc(100% + 6px); left:50%; transform:translateX(-50%);
+  background:var(--ink); color:var(--surface); font-family:var(--f-mono); font-size:11px;
+  padding:4px 7px; border-radius:5px; white-space:nowrap; opacity:0; pointer-events:none;
+  transition:opacity .12s; z-index:5;
+}
+.dcbars .col:hover .tip, .bartrackwrap:hover .tip{opacity:1}
+.legend{display:flex; gap:14px; flex-wrap:wrap; margin-top:10px; font-size:12px; color:var(--muted)}
+.legend i{display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:5px; vertical-align:-1px}
+
+/* ---------- settle ---------- */
+.settle{display:flex; flex-direction:column; gap:1px}
+.settle .row{display:flex; justify-content:space-between; gap:10px; padding:8px 0; border-top:1px solid var(--line); font-size:14px}
+.settle .row:first-child{border-top:none}
+.settle .amt{font-family:var(--f-mono); font-variant-numeric:tabular-nums}
+.pos{color:var(--accent-ink)}
+.neg{color:var(--danger)}
+.arrow{font-family:var(--f-mono); color:var(--muted)}
+
+/* ---------- fx ---------- */
+.fxrow{display:grid; grid-template-columns:1fr 92px auto 1fr 92px; gap:8px; align-items:end}
+.fxout{
+  font-family:var(--f-mono); font-size:30px; font-weight:600; font-variant-numeric:tabular-nums;
+  letter-spacing:-.02em; padding:10px 0 2px;
+}
+.fxout small{font-size:14px; color:var(--muted); font-weight:400; margin-left:6px}
+table.rates{width:100%; border-collapse:collapse; font-size:13.5px}
+table.rates th{
+  text-align:left; font-family:var(--f-mono); font-size:10.5px; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--faint); font-weight:500; padding:0 8px 6px 0; border-bottom:1px solid var(--line);
+}
+table.rates td{padding:7px 8px 7px 0; border-bottom:1px solid var(--line); font-variant-numeric:tabular-nums}
+table.rates td.num{font-family:var(--f-mono); text-align:right}
+table.rates td.num input{text-align:right; padding:4px 6px; font-size:13px}
+.tablewrap{overflow-x:auto}
+
+/* ---------- calendar ---------- */
+.cal{display:grid; grid-template-columns:repeat(7,1fr); gap:3px}
+.cal .hd{font-family:var(--f-mono); font-size:10.5px; letter-spacing:.08em; color:var(--faint); text-align:center; padding-bottom:4px}
+.cell{
+  border:1px solid var(--line); border-radius:7px; min-height:62px; padding:5px 6px;
+  background:var(--surface-2); display:flex; flex-direction:column; gap:2px; text-align:left; cursor:default;
+}
+.cell.blank{border:none; background:none}
+.cell.off{opacity:.45}
+.cell.trip{cursor:pointer; background:var(--surface); border-color:var(--line-strong)}
+.cell.trip:hover{border-color:var(--accent)}
+.cell .dnum{font-family:var(--f-mono); font-size:12px; font-variant-numeric:tabular-nums; color:var(--ink-2)}
+.cell .dayn{font-family:var(--f-mono); font-size:9px; letter-spacing:.06em; color:var(--accent-ink)}
+.cell .spend{font-family:var(--f-mono); font-size:10.5px; color:var(--muted); font-variant-numeric:tabular-nums; margin-top:auto}
+.cell .spend.over{color:var(--danger)}
+.cell .cnt{font-size:10.5px; color:var(--faint)}
+.agenda{list-style:none; margin:14px 0 0; padding:0}
+.agenda > li{border-top:1px solid var(--line); padding:11px 0}
+.agenda > li:first-child{border-top:none}
+.ag-h{display:flex; justify-content:space-between; align-items:baseline; gap:10px; flex-wrap:wrap}
+.ag-h .l{font-family:var(--f-mono); font-size:13px}
+.ag-h .l b{font-family:var(--f-body); font-weight:500; font-size:14.5px; margin-left:8px}
+.ag-h .r{font-family:var(--f-mono); font-size:12.5px; color:var(--muted); font-variant-numeric:tabular-nums}
+.ag-items{margin:5px 0 0; padding:0; list-style:none; font-size:13px; color:var(--ink-2)}
+.ag-items li{display:flex; gap:8px; padding:1px 0}
+.ag-items .t{font-family:var(--f-mono); color:var(--faint); font-size:12px; flex:0 0 42px}
+.overchip{
+  font-family:var(--f-mono); font-size:10px; letter-spacing:.06em; padding:1px 6px; border-radius:99px;
+  background:var(--danger-soft); color:var(--danger); margin-left:6px;
+}
+
+/* ---------- misc ---------- */
+.footbar{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; padding:6px 0 0}
+.sample-note{
+  display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between;
+  background:var(--warn-soft); border:1px solid var(--warn); color:var(--warn);
+  border-radius:9px; padding:9px 12px; font-size:13px; margin:0 0 14px;
+}
+.toast{
+  position:fixed; left:50%; bottom:22px; transform:translateX(-50%);
+  background:var(--ink); color:var(--surface); padding:9px 15px; border-radius:8px;
+  font-size:13.5px; z-index:99; opacity:0; pointer-events:none; transition:opacity .2s;
+  max-width:90vw; text-align:center;
+}
+.toast.on{opacity:1}
+.two{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+.three{display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px}
+@media (max-width:640px){
+  .fxrow{grid-template-columns:1fr 88px; }
+  .fxrow .swapcell{grid-column:1/-1; justify-self:start}
+  .three{grid-template-columns:1fr 1fr}
+  .trip-name{font-size:22px}
+  .barrow{grid-template-columns:56px 1fr 78px}
+  .tabs button{font-size:13px; padding:8px 2px}
+  .cell{min-height:54px; padding:4px}
+}
+</style>
+
+<style>
+:root{color-scheme:light dark}
+*{-webkit-tap-highlight-color:transparent}
+body{margin:0}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="pass">
+    <div class="pass-top">
+      <div style="min-width:0;flex:1">
+        <div class="eyebrow">travel log · 行程手帳</div>
+        <h1 class="trip-name"><input id="tripName" aria-label="旅程名稱" spellcheck="false"></h1>
+        <div class="trip-meta">
+          <div><span class="eyebrow">目的地</span><span class="v" id="mDest"></span></div>
+          <div><span class="eyebrow">日期</span><span class="v" id="mDates"></span></div>
+          <div><span class="eyebrow">天數</span><span class="v" id="mDays"></span></div>
+        </div>
+      </div>
+      <div class="pass-right">
+        <span class="badge grey" id="syncBadge" title="資料儲存位置"><span class="dot"></span><span id="syncText">本機儲存</span></span>
+      </div>
+    </div>
+  </header>
+
+  <nav class="tabbar">
+    <div class="tabs" role="tablist">
+      <button role="tab" data-view="plan" aria-selected="true">行程</button>
+      <button role="tab" data-view="money" aria-selected="false">記帳</button>
+      <button role="tab" data-view="fx" aria-selected="false">換匯</button>
+      <button role="tab" data-view="cal" aria-selected="false">行事曆</button>
+    </div>
+  </nav>
+
+  <div id="sampleNote" class="sample-note" hidden>
+    <span>目前顯示的是範例行程，讓你先看看每個功能長什麼樣子。</span>
+    <button class="btn sm" id="clearSample">清空範例，開始規劃</button>
+  </div>
+
+  <!-- ============ 行程 ============ -->
+  <section id="v-plan">
+    <div class="panel">
+      <div class="panel-h">
+        <h2>每日行程</h2>
+        <div class="chipset">
+          <button class="chip" id="modeTime" aria-pressed="true">時間軸</button>
+          <button class="chip" id="modeMap" aria-pressed="false">地圖</button>
+        </div>
+      </div>
+      <div class="rail" id="dayRail"></div>
+      <div class="panel-b">
+        <div id="planTime">
+          <ul class="tl" id="timeline"></ul>
+        </div>
+        <div id="planMap" hidden>
+          <div class="mapbox">
+            <iframe id="mapFrame" title="行程地圖" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+            <div class="map-note" id="mapNote"></div>
+          </div>
+          <ul class="stoplist" id="stopList"></ul>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">
+          <button class="btn primary" id="addSpot">＋ 新增景點</button>
+          <button class="btn" id="openDayRoute">在 Google 地圖開整天路線</button>
+          <button class="btn" id="addDay">＋ 加一天</button>
+          <button class="btn ghost" id="delDay">刪除這天</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" id="spotFormPanel" hidden>
+      <div class="panel-h"><h2 id="spotFormTitle">新增景點</h2></div>
+      <div class="panel-b">
+        <div class="grid two">
+          <div class="field"><label>時間</label><input type="time" id="sfTime"></div>
+          <div class="field"><label>分類</label><select id="sfCat"></select></div>
+        </div>
+        <div class="field" style="margin-top:10px"><label>名稱</label><input type="text" id="sfName" placeholder="例：淺草寺"></div>
+        <div class="field" style="margin-top:10px">
+          <label>地圖搜尋字串</label>
+          <input type="text" id="sfPlace" placeholder="例：淺草寺 東京（留空就用名稱去找）">
+        </div>
+        <div class="field" style="margin-top:10px"><label>備註</label><textarea id="sfNote" placeholder="門票、營業時間、交通方式…"></textarea></div>
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <button class="btn primary" id="sfSave">儲存</button>
+          <button class="btn" id="sfCancel">取消</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 記帳 ============ -->
+  <section id="v-money" hidden>
+    <div class="panel">
+      <div class="panel-h"><h2>花費總覽</h2><span class="hint" id="budgetHint"></span></div>
+      <div class="tiles" id="moneyTiles"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-h"><h2>記一筆</h2></div>
+      <div class="panel-b">
+        <div class="grid three">
+          <div class="field"><label>金額</label><input type="number" id="exAmt" inputmode="decimal" step="any" placeholder="0"></div>
+          <div class="field"><label>幣別</label><select id="exCur"></select></div>
+          <div class="field"><label>日期</label><input type="date" id="exDate"></div>
+        </div>
+        <div class="grid two" style="margin-top:10px">
+          <div class="field"><label>分類</label><select id="exCat"></select></div>
+          <div class="field"><label>付款人</label><select id="exPayer"></select></div>
+        </div>
+        <div class="field" style="margin-top:10px"><label>項目</label><input type="text" id="exNote" placeholder="例：晚餐 一蘭拉麵"></div>
+        <div class="field" style="margin-top:10px">
+          <label>分攤給誰（點一下切換）</label>
+          <div class="chipset" id="exShare"></div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px">
+          <button class="btn primary" id="exSave">加入</button>
+          <span class="hint" id="exPreview"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-h"><h2>分類統計</h2><span class="hint">佔總花費比例</span></div>
+      <div class="panel-b" id="catChart"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-h"><h2>每日花費</h2><span class="hint">虛線為每日預算</span></div>
+      <div class="panel-b">
+        <div class="daychart" id="dayChart"></div>
+        <div class="legend">
+          <span><i style="background:var(--accent)"></i>在預算內</span>
+          <span><i style="background:var(--danger)"></i>超出每日預算</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-h"><h2>分帳結算</h2><span class="hint">以台幣計算</span></div>
+      <div class="panel-b">
+        <div class="settle" id="settleBox"></div>
+        <div style="margin-top:14px" class="field">
+          <label>同行成員</label>
+          <div class="chipset" id="memberList"></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <input type="text" id="newMember" placeholder="新成員名字" style="max-width:180px">
+          <button class="btn sm" id="addMember">加入成員</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-h"><h2>明細</h2><span class="hint" id="expCount"></span></div>
+      <div class="panel-b" id="expList"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-h"><h2>預算設定</h2></div>
+      <div class="panel-b">
+        <div class="grid two">
+          <div class="field"><label>總預算（TWD）</label><input type="number" id="bTotal" step="any"></div>
+          <div class="field"><label>每日預算（TWD）</label><input type="number" id="bDaily" step="any"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 換匯 ============ -->
+  <section id="v-fx" hidden>
+    <div class="panel">
+      <div class="panel-h">
+        <h2>匯率換算</h2>
+        <span class="hint" id="fxStamp"></span>
+      </div>
+      <div class="panel-b">
+        <div class="fxrow">
+          <div class="field"><label>金額</label><input type="number" id="fxAmt" step="any" value="1000"></div>
+          <div class="field"><label>從</label><select id="fxFrom"></select></div>
+          <div class="swapcell"><button class="btn sm" id="fxSwap" title="交換">⇄</button></div>
+          <div class="field"><label>換成</label><div class="fxout" id="fxResult">—</div></div>
+          <div class="field"><label>幣別</label><select id="fxTo"></select></div>
+        </div>
+        <p class="hint" id="fxRateLine" style="margin:10px 0 0"></p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">
+          <button class="btn primary" id="fxUpdate">更新匯率</button>
+          <button class="btn" id="fxManualToggle">手動輸入匯率</button>
+        </div>
+        <p class="hint" id="fxMsg" style="margin:10px 0 0"></p>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-h"><h2>常用幣別對台幣</h2><span class="hint">1 外幣 = ? TWD</span></div>
+      <div class="panel-b">
+        <div class="tablewrap"><table class="rates" id="rateTable"></table></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 行事曆 ============ -->
+  <section id="v-cal" hidden>
+    <div class="panel">
+      <div class="panel-h"><h2 id="calTitle">行事曆</h2><span class="hint">點有標記的日子可跳到那天的行程</span></div>
+      <div class="panel-b" id="calBox"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-h"><h2>逐日總覽</h2></div>
+      <div class="panel-b"><ul class="agenda" id="agenda"></ul></div>
+    </div>
+  </section>
+
+  <div class="footbar">
+    <button class="btn sm" id="exportBtn">匯出備份 JSON</button>
+    <button class="btn sm" id="importBtn">匯入備份</button>
+    <input type="file" id="importFile" accept=".json,application/json" hidden>
+    <button class="btn sm ghost" id="resetBtn">全部清空</button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------------- currencies & rates ---------------- */
+// rate = 該幣別的 1 TWD 可換到多少（外幣 per TWD）
+var BASE_RATES = {
+  TWD:1, JPY:5.051492, USD:0.031528, KRW:43.292304, EUR:0.027216, HKD:0.247453,
+  THB:1.05016, CNY:0.2123, SGD:0.040173, GBP:0.023317, AUD:0.044098, VND:821.026625,
+  MYR:0.127443, PHP:1.970954, IDR:559.99866, CAD:0.043839, CHF:0.025599, MOP:0.254923,
+  NZD:0.053474, INR:2.996214, TRY:1.524142
+};
+var CUR_NAME = {
+  TWD:"新台幣", JPY:"日圓", USD:"美元", KRW:"韓元", EUR:"歐元", HKD:"港幣", THB:"泰銖",
+  CNY:"人民幣", SGD:"新加坡幣", GBP:"英鎊", AUD:"澳幣", VND:"越南盾", MYR:"馬幣",
+  PHP:"菲律賓披索", IDR:"印尼盾", CAD:"加幣", CHF:"瑞士法郎", MOP:"澳門幣",
+  NZD:"紐幣", INR:"印度盧比", TRY:"土耳其里拉"
+};
+var CUR_ORDER = ["TWD","JPY","KRW","USD","EUR","HKD","CNY","THB","SGD","VND","MYR","PHP","IDR","GBP","AUD","CAD","CHF","MOP","NZD","INR","TRY"];
+var CATS = ["交通","住宿","餐飲","門票","購物","其他"];
+var SPOT_CATS = ["景點","餐廳","住宿","交通","購物","其他"];
+var WD = ["日","一","二","三","四","五","六"];
+
+/* ---------------- helpers ---------------- */
+function uid(){ return Math.random().toString(36).slice(2,9); }
+function el(id){ return document.getElementById(id); }
+function iso(d){
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+function parseISO(s){ var p=String(s||"").split("-"); return new Date(+p[0],(+p[1]||1)-1,+p[2]||1); }
+function addDays(s,n){ var d=parseISO(s); d.setDate(d.getDate()+n); return iso(d); }
+function mdLabel(s){ var d=parseISO(s); return String(d.getMonth()+1).padStart(2,"0")+"/"+String(d.getDate()).padStart(2,"0"); }
+function wdLabel(s){ return "週"+WD[parseISO(s).getDay()]; }
+function nf(n,dp){
+  if(!isFinite(n)) return "—";
+  return n.toLocaleString("zh-TW",{minimumFractionDigits:dp||0,maximumFractionDigits:dp||0});
+}
+function money(n){ return "NT$"+nf(Math.round(n)); }
+function esc(s){
+  return String(s==null?"":s).replace(/[&<>"']/g,function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+  });
+}
+function toast(msg){
+  var t=el("toast"); t.textContent=msg; t.classList.add("on");
+  clearTimeout(toast._t); toast._t=setTimeout(function(){ t.classList.remove("on"); },2600);
+}
+
+/* ---------------- sample state ---------------- */
+function sampleState(){
+  var start = iso(new Date(new Date().getFullYear(), new Date().getMonth()+1, 12));
+  var me=uid(), mate=uid();
+  var days=[
+    {id:uid(),date:start,title:"抵達・淺草",spots:[
+      {id:uid(),time:"14:20",name:"成田機場入境",place:"成田國際機場",cat:"交通",note:"買 Suica、換 JR 券"},
+      {id:uid(),time:"17:00",name:"飯店 check in",place:"淺草 東京 飯店",cat:"住宿",note:"寄放行李後出門"},
+      {id:uid(),time:"18:30",name:"淺草寺・仲見世通",place:"淺草寺 東京",cat:"景點",note:"晚上人少，燈籠很好拍"},
+      {id:uid(),time:"20:00",name:"晚餐 淺草今半",place:"淺草今半 國際通本店",cat:"餐廳",note:""}
+    ]},
+    {id:uid(),date:addDays(start,1),title:"築地・銀座",spots:[
+      {id:uid(),time:"08:00",name:"築地場外市場",place:"築地場外市場",cat:"景點",note:"玉子燒、海膽丼"},
+      {id:uid(),time:"11:00",name:"濱離宮恩賜庭園",place:"濱離宮恩賜庭園",cat:"景點",note:"門票 300 日圓"},
+      {id:uid(),time:"14:00",name:"銀座逛街",place:"銀座 東京",cat:"購物",note:"Uniqlo 旗艦、伊東屋文具"},
+      {id:uid(),time:"19:00",name:"晚餐 一蘭拉麵",place:"一蘭 銀座",cat:"餐廳",note:""}
+    ]},
+    {id:uid(),date:addDays(start,2),title:"箱根一日",spots:[
+      {id:uid(),time:"07:30",name:"新宿站搭小田急",place:"新宿站",cat:"交通",note:"箱根周遊券 2 日券"},
+      {id:uid(),time:"10:30",name:"大涌谷",place:"大涌谷 箱根",cat:"景點",note:"黑蛋"},
+      {id:uid(),time:"13:00",name:"蘆之湖海賊船",place:"蘆之湖 箱根",cat:"景點",note:""},
+      {id:uid(),time:"16:00",name:"箱根湯本泡湯",place:"箱根湯本",cat:"景點",note:"記得帶毛巾"}
+    ]},
+    {id:uid(),date:addDays(start,3),title:"澀谷・原宿",spots:[
+      {id:uid(),time:"10:00",name:"明治神宮",place:"明治神宮",cat:"景點",note:""},
+      {id:uid(),time:"12:00",name:"竹下通",place:"竹下通 原宿",cat:"購物",note:""},
+      {id:uid(),time:"15:00",name:"澀谷 Sky",place:"渋谷スカイ",cat:"景點",note:"預約 15:40 場次，看日落"},
+      {id:uid(),time:"19:30",name:"晚餐 燒肉",place:"澀谷 燒肉",cat:"餐廳",note:""}
+    ]},
+    {id:uid(),date:addDays(start,4),title:"回程",spots:[
+      {id:uid(),time:"09:00",name:"飯店退房・寄放行李",place:"淺草 東京 飯店",cat:"住宿",note:""},
+      {id:uid(),time:"10:30",name:"上野阿美橫町買伴手禮",place:"阿美橫町 上野",cat:"購物",note:""},
+      {id:uid(),time:"15:00",name:"Skyliner 前往成田",place:"京成上野站",cat:"交通",note:"班機 18:55"}
+    ]}
+  ];
+  var d0=start, d1=addDays(start,1), d2=addDays(start,2), d3=addDays(start,3), d4=addDays(start,4);
+  var expenses=[
+    {id:uid(),date:d0,amount:8600,cur:"TWD",cat:"交通",payerId:me,shareIds:[me,mate],note:"台北→東京 來回機票（每人）"},
+    {id:uid(),date:d0,amount:3000,cur:"JPY",cat:"交通",payerId:me,shareIds:[me,mate],note:"Suica 儲值"},
+    {id:uid(),date:d0,amount:14800,cur:"JPY",cat:"住宿",payerId:mate,shareIds:[me,mate],note:"淺草飯店 1 晚"},
+    {id:uid(),date:d0,amount:5200,cur:"JPY",cat:"餐飲",payerId:me,shareIds:[me,mate],note:"晚餐 淺草今半"},
+    {id:uid(),date:d1,amount:2400,cur:"JPY",cat:"餐飲",payerId:mate,shareIds:[me,mate],note:"築地早餐"},
+    {id:uid(),date:d1,amount:600,cur:"JPY",cat:"門票",payerId:me,shareIds:[me,mate],note:"濱離宮庭園"},
+    {id:uid(),date:d1,amount:9800,cur:"JPY",cat:"購物",payerId:me,shareIds:[me],note:"伊東屋文具"},
+    {id:uid(),date:d1,amount:14800,cur:"JPY",cat:"住宿",payerId:mate,shareIds:[me,mate],note:"淺草飯店 1 晚"},
+    {id:uid(),date:d2,amount:6100,cur:"JPY",cat:"交通",payerId:me,shareIds:[me,mate],note:"箱根周遊券"},
+    {id:uid(),date:d2,amount:3800,cur:"JPY",cat:"餐飲",payerId:mate,shareIds:[me,mate],note:"箱根午餐"},
+    {id:uid(),date:d2,amount:1400,cur:"JPY",cat:"門票",payerId:me,shareIds:[me,mate],note:"泡湯"},
+    {id:uid(),date:d3,amount:5000,cur:"JPY",cat:"門票",payerId:me,shareIds:[me,mate],note:"澀谷 Sky × 2"},
+    {id:uid(),date:d3,amount:11200,cur:"JPY",cat:"餐飲",payerId:mate,shareIds:[me,mate],note:"晚餐 燒肉"},
+    {id:uid(),date:d3,amount:6800,cur:"JPY",cat:"購物",payerId:me,shareIds:[me],note:"原宿買衣服"},
+    {id:uid(),date:d4,amount:7400,cur:"JPY",cat:"購物",payerId:mate,shareIds:[me,mate],note:"阿美橫町伴手禮"},
+    {id:uid(),date:d4,amount:2600,cur:"JPY",cat:"交通",payerId:me,shareIds:[me,mate],note:"Skyliner × 2"}
+  ];
+  return {
+    v:1, isSample:true,
+    name:"東京五日", dest:"日本・東京", tripCur:"JPY",
+    members:[{id:me,name:"我"},{id:mate,name:"阿宏"}],
+    budget:{total:60000, daily:9000},
+    rates:Object.assign({},BASE_RATES),
+    ratesUpdated:"2026-09-02T00:02:31Z",
+    ratesSource:"內建基準值",
+    days:days, expenses:expenses,
+    updatedAt:new Date().toISOString()
+  };
+}
+
+function emptyState(){
+  var me=uid();
+  var today=iso(new Date());
+  return {
+    v:1, isSample:false,
+    name:"我的旅程", dest:"", tripCur:"JPY",
+    members:[{id:me,name:"我"}],
+    budget:{total:0, daily:0},
+    rates:Object.assign({},BASE_RATES),
+    ratesUpdated:"2026-09-02T00:02:31Z",
+    ratesSource:"內建基準值",
+    days:[{id:uid(),date:today,title:"",spots:[]}],
+    expenses:[],
+    updatedAt:new Date().toISOString()
+  };
+}
+
+/* ---------------- storage ---------------- */
+var LS_KEY="suixing-travel-log-v1";
+var S=null, curDay=0, mapMode=false, editingSpot=null, manualRates=false;
+
+function loadLocal(){
+  try{ var raw=localStorage.getItem(LS_KEY); return raw?JSON.parse(raw):null; }catch(e){ return null; }
+}
+function saveLocal(){
+  try{ localStorage.setItem(LS_KEY, JSON.stringify(S)); }catch(e){}
+}
+function persist(){
+  S.updatedAt=new Date().toISOString();
+  saveLocal();
+}
+function setSync(){
+  var b=el("syncBadge"), t=el("syncText");
+  b.className="badge grey";
+  t.textContent="存在這台裝置";
+  b.title="行程和帳都存在這台裝置的瀏覽器裡，不會上傳到任何伺服器";
+}
+
+/* ---------------- money math ---------------- */
+function rateOf(cur){
+  var r=S.rates[cur];
+  return (typeof r==="number" && r>0)?r:null;
+}
+function toTWD(amount,cur){
+  var r=rateOf(cur);
+  if(!r) return 0;
+  return amount/r;
+}
+function memberName(id){
+  for(var i=0;i<S.members.length;i++) if(S.members[i].id===id) return S.members[i].name;
+  return "—";
+}
+function tripDates(){ return S.days.map(function(d){ return d.date; }); }
+function spendByDate(){
+  var m={};
+  S.expenses.forEach(function(e){ m[e.date]=(m[e.date]||0)+toTWD(e.amount,e.cur); });
+  return m;
+}
+function totalSpend(){
+  return S.expenses.reduce(function(a,e){ return a+toTWD(e.amount,e.cur); },0);
+}
+
+/* ---------------- render: header ---------------- */
+function renderHeader(){
+  el("tripName").value=S.name;
+  el("mDest").textContent=S.dest||"—";
+  var ds=tripDates();
+  if(ds.length){
+    var sorted=ds.slice().sort();
+    el("mDates").textContent=mdLabel(sorted[0])+" – "+mdLabel(sorted[sorted.length-1]);
+  } else el("mDates").textContent="—";
+  el("mDays").textContent=S.days.length+" 天";
+  el("sampleNote").hidden=!S.isSample;
+}
+
+/* ---------------- render: plan ---------------- */
+function renderRail(){
+  var r=el("dayRail"); r.innerHTML="";
+  S.days.forEach(function(d,i){
+    var b=document.createElement("button");
+    b.className="day-chip"; b.setAttribute("aria-pressed", i===curDay?"true":"false");
+    b.innerHTML='<span class="n">DAY '+(i+1)+'</span><br><span class="d">'+mdLabel(d.date)+'</span><br><span class="w">'+wdLabel(d.date)+(d.title?" · "+esc(d.title):"")+'</span>';
+    b.onclick=function(){ curDay=i; renderPlan(); };
+    r.appendChild(b);
+  });
+}
+function mapQuery(sp){ return sp.place||sp.name; }
+function searchUrl(q){ return "https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(q); }
+
+function renderPlan(){
+  renderRail();
+  var d=S.days[curDay];
+  if(!d){ curDay=0; d=S.days[0]; }
+  el("modeTime").setAttribute("aria-pressed", mapMode?"false":"true");
+  el("modeMap").setAttribute("aria-pressed", mapMode?"true":"false");
+  el("planTime").hidden=mapMode; el("planMap").hidden=!mapMode;
+
+  if(!d){ el("timeline").innerHTML='<li><div class="empty">還沒有任何一天，按下面「加一天」開始。</div></li>'; return; }
+  var spots=d.spots.slice().sort(function(a,b){ return (a.time||"99:99").localeCompare(b.time||"99:99"); });
+
+  // timeline
+  var tl=el("timeline");
+  if(!spots.length){
+    tl.innerHTML='<li style="grid-template-columns:1fr"><div class="empty">這天還空著。按「＋ 新增景點」排第一個行程。</div></li>';
+  } else {
+    tl.innerHTML=spots.map(function(sp){
+      return '<li><div class="when">'+esc(sp.time||"--:--")+'</div><div class="body">'+
+        '<div class="nm">'+esc(sp.name)+'<span class="cat-tag">'+esc(sp.cat||"景點")+'</span></div>'+
+        (sp.note?'<div class="sub">'+esc(sp.note)+'</div>':"")+
+        '<div class="acts">'+
+          '<a class="maplink" href="'+esc(searchUrl(mapQuery(sp)))+'" target="_blank" rel="noopener">開地圖 ↗</a>'+
+          '<button class="btn sm" data-edit="'+sp.id+'">編輯</button>'+
+          '<button class="btn sm ghost" data-del="'+sp.id+'">刪除</button>'+
+        '</div></div></li>';
+    }).join("");
+    Array.prototype.forEach.call(tl.querySelectorAll("[data-edit]"),function(b){
+      b.onclick=function(){ openSpotForm(b.getAttribute("data-edit")); };
+    });
+    Array.prototype.forEach.call(tl.querySelectorAll("[data-del]"),function(b){
+      b.onclick=function(){
+        var id=b.getAttribute("data-del");
+        d.spots=d.spots.filter(function(x){ return x.id!==id; });
+        persist(); renderAll(); toast("已刪除");
+      };
+    });
+  }
+
+  // map
+  var withPlace=spots.filter(function(sp){ return mapQuery(sp); });
+  var f=el("mapFrame");
+  if(withPlace.length){
+    var q=mapQuery(withPlace[0]);
+    var src="https://www.google.com/maps?q="+encodeURIComponent(q)+"&output=embed&hl=zh-TW&z=14";
+    if(f.getAttribute("data-src")!==src){ f.setAttribute("data-src",src); f.src=src; watchFrame(); }
+    el("mapNote").innerHTML="地圖顯示這天的第一站「"+esc(q)+"」。下面每一站都可以單獨開地圖，或按「整天路線」一次規劃。";
+  } else {
+    f.removeAttribute("src"); f.removeAttribute("data-src");
+    el("mapNote").textContent="這天還沒有可以定位的地點。";
+  }
+  el("stopList").innerHTML=withPlace.map(function(sp,i){
+    return '<li><span class="idx">'+(i+1)+'</span><span class="t">'+esc(sp.time||"")+' '+esc(sp.name)+'</span>'+
+      '<a class="maplink" href="'+esc(searchUrl(mapQuery(sp)))+'" target="_blank" rel="noopener">地圖 ↗</a></li>';
+  }).join("") || '<li><span class="t" style="color:var(--muted)">沒有地點</span></li>';
+}
+function watchFrame(){
+  var f=el("mapFrame"), ok=false;
+  f.onload=function(){ ok=true; };
+  setTimeout(function(){
+    if(!ok && !el("planMap").hidden){
+      el("mapNote").innerHTML="這個環境不允許把 Google 地圖嵌在頁面裡，所以下面改用連結：每一站都可以點開 Google 地圖，導航一樣正常。";
+    }
+  },4500);
+}
+
+function openSpotForm(id){
+  var d=S.days[curDay]; if(!d) return;
+  editingSpot=id||null;
+  var sp=id?d.spots.filter(function(x){return x.id===id;})[0]:null;
+  el("spotFormTitle").textContent=sp?"編輯景點":"新增景點";
+  el("sfTime").value=sp?(sp.time||""):"";
+  el("sfName").value=sp?sp.name:"";
+  el("sfPlace").value=sp?(sp.place||""):"";
+  el("sfNote").value=sp?(sp.note||""):"";
+  el("sfCat").value=sp?(sp.cat||"景點"):"景點";
+  el("spotFormPanel").hidden=false;
+  el("spotFormPanel").scrollIntoView({behavior:"smooth",block:"nearest"});
+  el("sfName").focus();
+}
+
+/* ---------------- render: money ---------------- */
+function renderMoney(){
+  var total=totalSpend();
+  var bt=+S.budget.total||0, bd=+S.budget.daily||0;
+  var nDays=S.days.length||1;
+  var perDay=total/nDays;
+  var left=bt-total;
+  var tiles=[
+    {k:"已花費",v:money(total),s:S.expenses.length+" 筆紀錄"},
+    {k:"預算剩餘",v:bt?money(left):"未設定",s:bt?("總預算 "+money(bt)):"到下面設定總預算",over:bt&&left<0,
+      meter:bt?Math.min(total/bt,1):null, meterOver:bt&&total>bt},
+    {k:"平均每日",v:money(perDay),s:bd?("每日預算 "+money(bd)):"共 "+nDays+" 天",over:bd&&perDay>bd},
+    {k:"每人分攤",v:money(total/(S.members.length||1)),s:S.members.length+" 人平均"}
+  ];
+  el("moneyTiles").innerHTML=tiles.map(function(t){
+    return '<div class="tile'+(t.over?" over":"")+'"><div class="k">'+t.k+'</div><div class="v">'+t.v+'</div><div class="s">'+esc(t.s)+'</div>'+
+      (t.meter!=null?'<div class="meter"><i class="'+(t.meterOver?"over":"")+'" style="width:'+(t.meter*100).toFixed(1)+'%"></i></div>':"")+'</div>';
+  }).join("");
+  el("budgetHint").textContent = bt ? (total>bt?"已超出總預算 "+money(total-bt):"還有 "+money(left)+" 可以花") : "";
+
+  // category chart
+  var byCat={}; CATS.forEach(function(c){ byCat[c]=0; });
+  S.expenses.forEach(function(e){ byCat[e.cat]=(byCat[e.cat]||0)+toTWD(e.amount,e.cur); });
+  var maxCat=Math.max.apply(null,CATS.map(function(c){ return byCat[c]||0; }).concat([1]));
+  el("catChart").innerHTML = total===0
+    ? '<div class="empty">還沒有花費紀錄。</div>'
+    : CATS.map(function(c){
+        var v=byCat[c]||0, pct=total?v/total*100:0;
+        return '<div class="barrow"><div class="lbl">'+c+'</div>'+
+          '<div class="bartrackwrap"><div class="bartrack"><i style="width:'+(v/maxCat*100).toFixed(1)+'%"></i></div>'+
+          '<span class="tip">'+c+' '+money(v)+'（'+pct.toFixed(0)+'%）</span></div>'+
+          '<div class="val">'+money(v)+' <em>'+pct.toFixed(0)+'%</em></div></div>';
+      }).join("");
+
+  // daily chart
+  var sp=spendByDate();
+  var ds=tripDates();
+  var maxDay=Math.max.apply(null,ds.map(function(d){ return sp[d]||0; }).concat([bd||0,1]));
+  var bars = ds.map(function(d,i){
+    var v=sp[d]||0, over=bd&&v>bd;
+    var h=Math.max(v/maxDay*100,v>0?3:0);
+    return '<div class="col">'+
+      '<span class="tip">Day '+(i+1)+' · '+mdLabel(d)+'<br>'+money(v)+(over?" · 超出每日預算":"")+'</span>'+
+      '<div class="bar'+(over?" over":"")+'" style="height:'+h.toFixed(1)+'%"></div></div>';
+  }).join("");
+  var budgetLine = bd ? '<div class="budgetline" style="bottom:'+Math.min(bd/maxDay*100,100).toFixed(1)+'%"><span>'+money(bd)+'</span></div>' : "";
+  var ticks = ds.map(function(d){ return '<div class="tick">'+mdLabel(d)+'</div>'; }).join("");
+  el("dayChart").innerHTML='<div class="dcbars">'+bars+budgetLine+'</div><div class="dcticks">'+ticks+'</div>';
+
+  // settle
+  var bal={}; S.members.forEach(function(m){ bal[m.id]=0; });
+  S.expenses.forEach(function(e){
+    var t=toTWD(e.amount,e.cur);
+    var share=(e.shareIds&&e.shareIds.length)?e.shareIds:[e.payerId];
+    if(bal[e.payerId]!=null) bal[e.payerId]+=t;
+    share.forEach(function(id){ if(bal[id]!=null) bal[id]-=t/share.length; });
+  });
+  var rows=S.members.map(function(m){
+    var v=bal[m.id]||0;
+    var cls=v>1?"pos":(v<-1?"neg":"");
+    var txt=v>1?("應收 "+money(v)):(v<-1?("應付 "+money(-v)):"結清");
+    return '<div class="row"><span>'+esc(m.name)+'</span><span class="amt '+cls+'">'+txt+'</span></div>';
+  });
+  // greedy settlement
+  var cred=[], debt=[];
+  S.members.forEach(function(m){
+    var v=Math.round(bal[m.id]||0);
+    if(v>1) cred.push({n:m.name,v:v}); else if(v<-1) debt.push({n:m.name,v:-v});
+  });
+  cred.sort(function(a,b){return b.v-a.v;}); debt.sort(function(a,b){return b.v-a.v;});
+  var moves=[], gi=0, hi=0, guard=0;
+  while(gi<debt.length && hi<cred.length && guard++<200){
+    var pay=Math.min(debt[gi].v,cred[hi].v);
+    moves.push(debt[gi].n+" → "+cred[hi].n+"　"+money(pay));
+    debt[gi].v-=pay; cred[hi].v-=pay;
+    if(debt[gi].v<=1) gi++;
+    if(cred[hi].v<=1) hi++;
+  }
+  if(moves.length){
+    rows.push('<div class="row" style="border-top:1px solid var(--line-strong);margin-top:6px"><span class="eyebrow" style="letter-spacing:.1em">怎麼還</span><span></span></div>');
+    moves.forEach(function(m){
+      var p=m.split("　");
+      rows.push('<div class="row"><span class="arrow">'+esc(p[0])+'</span><span class="amt">'+esc(p[1])+'</span></div>');
+    });
+  }
+  el("settleBox").innerHTML=rows.join("") || '<div class="empty">還沒有成員。</div>';
+
+  // members
+  el("memberList").innerHTML=S.members.map(function(m){
+    return '<span class="chip" style="cursor:default">'+esc(m.name)+
+      (S.members.length>1?' <button class="btn sm ghost" style="padding:0 3px;margin-left:4px" data-rm="'+m.id+'" title="移除">×</button>':"")+'</span>';
+  }).join("");
+  Array.prototype.forEach.call(el("memberList").querySelectorAll("[data-rm]"),function(b){
+    b.onclick=function(){
+      var id=b.getAttribute("data-rm");
+      S.members=S.members.filter(function(m){ return m.id!==id; });
+      S.expenses=S.expenses.filter(function(e){ return e.payerId!==id; });
+      S.expenses.forEach(function(e){ e.shareIds=(e.shareIds||[]).filter(function(x){ return x!==id; }); });
+      persist(); renderAll();
+    };
+  });
+
+  // expense list
+  var byDate={};
+  S.expenses.forEach(function(e){ (byDate[e.date]=byDate[e.date]||[]).push(e); });
+  var dates=Object.keys(byDate).sort();
+  el("expCount").textContent=S.expenses.length?("共 "+S.expenses.length+" 筆"):"";
+  el("expList").innerHTML = dates.length===0
+    ? '<div class="empty">還沒有紀錄。在上面「記一筆」加入第一筆花費。</div>'
+    : dates.map(function(d){
+        var list=byDate[d];
+        var sum=list.reduce(function(a,e){ return a+toTWD(e.amount,e.cur); },0);
+        return '<div class="exp-day"><div class="exp-day-h"><span class="dt">'+mdLabel(d)+' '+wdLabel(d)+'</span><span class="sum">'+money(sum)+'</span></div>'+
+          list.map(function(e){
+            var share=(e.shareIds&&e.shareIds.length)?e.shareIds:[e.payerId];
+            return '<div class="exp"><div class="nm">'+esc(e.note||e.cat)+
+              '<span class="cat-tag">'+esc(e.cat)+'</span>'+
+              '<div class="who">'+esc(memberName(e.payerId))+' 付 · 分攤 '+share.length+' 人</div></div>'+
+              '<div class="amt">'+money(toTWD(e.amount,e.cur))+
+                (e.cur!=="TWD"?'<small>'+nf(e.amount,0)+' '+e.cur+'</small>':"")+'</div>'+
+              '<button class="btn sm ghost" data-xdel="'+e.id+'">刪</button></div>';
+          }).join("")+'</div>';
+      }).join("");
+  Array.prototype.forEach.call(el("expList").querySelectorAll("[data-xdel]"),function(b){
+    b.onclick=function(){
+      var id=b.getAttribute("data-xdel");
+      S.expenses=S.expenses.filter(function(e){ return e.id!==id; });
+      persist(); renderAll(); toast("已刪除");
+    };
+  });
+
+  el("bTotal").value=S.budget.total||"";
+  el("bDaily").value=S.budget.daily||"";
+  renderExpForm();
+}
+
+function renderExpForm(){
+  var cur=el("exCur");
+  if(cur.options.length===0){
+    cur.innerHTML=CUR_ORDER.map(function(c){ return '<option value="'+c+'">'+c+' '+CUR_NAME[c]+'</option>'; }).join("");
+    cur.value=S.tripCur||"JPY";
+  }
+  var cat=el("exCat");
+  if(cat.options.length===0) cat.innerHTML=CATS.map(function(c){ return '<option>'+c+'</option>'; }).join("");
+  var pay=el("exPayer"), keep=pay.value;
+  pay.innerHTML=S.members.map(function(m){ return '<option value="'+m.id+'">'+esc(m.name)+'</option>'; }).join("");
+  if(keep && S.members.some(function(m){return m.id===keep;})) pay.value=keep;
+  if(!el("exDate").value) el("exDate").value=(S.days[curDay]&&S.days[curDay].date)||iso(new Date());
+  var sh=el("exShare");
+  var chosen=sh._sel;
+  if(!chosen) chosen=S.members.map(function(m){ return m.id; });
+  chosen=chosen.filter(function(id){ return S.members.some(function(m){return m.id===id;}); });
+  sh._sel=chosen;
+  sh.innerHTML=S.members.map(function(m){
+    return '<button class="chip" data-sh="'+m.id+'" aria-pressed="'+(chosen.indexOf(m.id)>=0)+'">'+esc(m.name)+'</button>';
+  }).join("");
+  Array.prototype.forEach.call(sh.querySelectorAll("[data-sh]"),function(b){
+    b.onclick=function(){
+      var id=b.getAttribute("data-sh"), i=sh._sel.indexOf(id);
+      if(i>=0) sh._sel.splice(i,1); else sh._sel.push(id);
+      renderExpForm(); updateExpPreview();
+    };
+  });
+  updateExpPreview();
+}
+function updateExpPreview(){
+  var a=parseFloat(el("exAmt").value), c=el("exCur").value;
+  var n=el("exShare")._sel?el("exShare")._sel.length:0;
+  if(!isFinite(a)||a<=0){ el("exPreview").textContent=""; return; }
+  var t=toTWD(a,c);
+  el("exPreview").textContent="≈ "+money(t)+(c!=="TWD"?"（1 "+c+" = "+nf(1/rateOf(c),3)+" TWD）":"")+(n>1?"，每人 "+money(t/n):"");
+}
+
+/* ---------------- render: fx ---------------- */
+function fillCurSelect(sel,val){
+  sel.innerHTML=CUR_ORDER.map(function(c){ return '<option value="'+c+'">'+c+' · '+CUR_NAME[c]+'</option>'; }).join("");
+  sel.value=val;
+}
+function renderFx(){
+  if(!el("fxFrom").options.length){
+    fillCurSelect(el("fxFrom"), S.tripCur||"JPY");
+    fillCurSelect(el("fxTo"), "TWD");
+  }
+  var d=S.ratesUpdated?new Date(S.ratesUpdated):null;
+  el("fxStamp").textContent=(S.ratesSource||"")+(d?"　"+d.toLocaleString("zh-TW",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"})+" 更新":"");
+  calcFx();
+  var rows=CUR_ORDER.filter(function(c){ return c!=="TWD"; }).map(function(c){
+    var r=rateOf(c);
+    var twd=r?1/r:null;
+    return '<tr><td>'+c+'</td><td>'+CUR_NAME[c]+'</td><td class="num">'+
+      (manualRates
+        ? '<input type="number" step="any" data-rate="'+c+'" value="'+(twd?twd.toFixed(4):"")+'">'
+        : (twd?nf(twd, twd<1?4:(twd<100?3:2)):"—"))+
+      '</td><td class="num" style="color:var(--muted)">'+(r?nf(r, r<1?4:2):"—")+'</td></tr>';
+  }).join("");
+  el("rateTable").innerHTML='<thead><tr><th>代碼</th><th>幣別</th><th style="text-align:right">1 外幣 = TWD</th><th style="text-align:right">1 TWD = 外幣</th></tr></thead><tbody>'+rows+'</tbody>';
+  if(manualRates){
+    Array.prototype.forEach.call(el("rateTable").querySelectorAll("[data-rate]"),function(inp){
+      inp.onchange=function(){
+        var c=inp.getAttribute("data-rate"), v=parseFloat(inp.value);
+        if(isFinite(v)&&v>0){
+          S.rates[c]=1/v;
+          S.ratesSource="手動輸入"; S.ratesUpdated=new Date().toISOString();
+          persist(); renderAll(); toast(c+" 匯率已更新");
+        }
+      };
+    });
+  }
+  el("fxManualToggle").textContent=manualRates?"完成手動輸入":"手動輸入匯率";
+}
+function calcFx(){
+  var a=parseFloat(el("fxAmt").value);
+  var f=el("fxFrom").value, t=el("fxTo").value;
+  var rf=rateOf(f), rt=rateOf(t);
+  if(!isFinite(a)||!rf||!rt){ el("fxResult").textContent="—"; el("fxRateLine").textContent=""; return; }
+  var out=a/rf*rt;
+  el("fxResult").innerHTML=nf(out, out<10?4:(out<1000?2:0))+'<small>'+t+'</small>';
+  el("fxRateLine").textContent="1 "+f+" = "+nf(rt/rf, (rt/rf)<1?4:4)+" "+t+"　／　1 "+t+" = "+nf(rf/rt,(rf/rt)<1?4:4)+" "+f;
+}
+function updateRates(){
+  el("fxMsg").textContent="正在抓最新匯率…";
+  var urls=[
+    "https://open.er-api.com/v6/latest/TWD",
+    "https://api.exchangerate-api.com/v4/latest/TWD"
+  ];
+  var i=0;
+  function attempt(){
+    if(i>=urls.length){
+      el("fxMsg").innerHTML="這個環境不允許頁面自己連外部匯率服務，所以線上更新用不了。按「手動輸入匯率」把你在銀行或 Google 看到的數字填進去，換算就會跟著更新。";
+      manualRates=true; renderFx();
+      return;
+    }
+    var url=urls[i++];
+    var ctl = (typeof AbortController!=="undefined")?new AbortController():null;
+    var to=setTimeout(function(){ if(ctl) ctl.abort(); },8000);
+    fetch(url, ctl?{signal:ctl.signal}:{})
+      .then(function(r){ if(!r.ok) throw new Error("http"); return r.json(); })
+      .then(function(j){
+        clearTimeout(to);
+        var rt=j.rates||j.conversion_rates;
+        if(!rt||!rt.JPY) throw new Error("shape");
+        var n=0;
+        CUR_ORDER.forEach(function(c){
+          if(c==="TWD"){ S.rates.TWD=1; return; }
+          if(typeof rt[c]==="number" && rt[c]>0){ S.rates[c]=rt[c]; n++; }
+        });
+        S.ratesSource="線上更新"; S.ratesUpdated=new Date().toISOString();
+        persist(); manualRates=false; renderAll();
+        el("fxMsg").textContent="已更新 "+n+" 種幣別。";
+        toast("匯率已更新");
+      })
+      .catch(function(){ clearTimeout(to); attempt(); });
+  }
+  attempt();
+}
+
+/* ---------------- render: calendar ---------------- */
+function renderCal(){
+  var sp=spendByDate();
+  var bd=+S.budget.daily||0;
+  var ds=tripDates().slice().sort();
+  if(!ds.length){ el("calBox").innerHTML='<div class="empty">還沒有行程日期。</div>'; el("agenda").innerHTML=""; return; }
+  var dayIndex={}; S.days.forEach(function(d,i){ dayIndex[d.date]=i; });
+
+  // months spanned
+  var first=parseISO(ds[0]), last=parseISO(ds[ds.length-1]);
+  var months=[]; var cur=new Date(first.getFullYear(),first.getMonth(),1);
+  while(cur<=last || (cur.getFullYear()===last.getFullYear()&&cur.getMonth()===last.getMonth())){
+    months.push(new Date(cur));
+    cur.setMonth(cur.getMonth()+1);
+    if(months.length>12) break;
+  }
+  el("calTitle").textContent = (first.getFullYear()===last.getFullYear())
+    ? first.getFullYear()+" 年 "+months.map(function(m){ return (m.getMonth()+1)+" 月"; }).join("・")
+    : "行事曆";
+
+  var html=months.map(function(m){
+    var y=m.getFullYear(), mo=m.getMonth();
+    var lead=new Date(y,mo,1).getDay();
+    var dim=new Date(y,mo+1,0).getDate();
+    var cells="";
+    for(var i=0;i<lead;i++) cells+='<div class="cell blank"></div>';
+    for(var day=1;day<=dim;day++){
+      var key=iso(new Date(y,mo,day));
+      var idx=dayIndex[key];
+      var isTrip=idx!=null;
+      var v=sp[key]||0;
+      var over=bd&&v>bd;
+      cells+='<'+(isTrip?'button':'div')+' class="cell'+(isTrip?" trip":" off")+'"'+(isTrip?' data-jump="'+idx+'"':"")+'>'+
+        '<span class="dnum">'+day+'</span>'+
+        (isTrip?'<span class="dayn">DAY '+(idx+1)+'</span>':"")+
+        (isTrip&&S.days[idx].spots.length?'<span class="cnt">'+S.days[idx].spots.length+' 個行程</span>':"")+
+        (v?'<span class="spend'+(over?" over":"")+'">'+money(v)+'</span>':"")+
+        '</'+(isTrip?'button':'div')+'>';
+    }
+    return '<div style="margin-bottom:16px"><div class="eyebrow" style="margin-bottom:6px">'+y+' / '+String(mo+1).padStart(2,"0")+'</div>'+
+      '<div class="cal">'+WD.map(function(w){ return '<div class="hd">'+w+'</div>'; }).join("")+cells+'</div></div>';
+  }).join("");
+  el("calBox").innerHTML=html;
+  Array.prototype.forEach.call(el("calBox").querySelectorAll("[data-jump]"),function(b){
+    b.onclick=function(){
+      curDay=+b.getAttribute("data-jump");
+      switchView("plan"); renderPlan();
+      window.scrollTo({top:0,behavior:"smooth"});
+    };
+  });
+
+  el("agenda").innerHTML=S.days.map(function(d,i){
+    var v=sp[d.date]||0, over=bd&&v>bd;
+    var items=d.spots.slice().sort(function(a,b){ return (a.time||"99:99").localeCompare(b.time||"99:99"); });
+    return '<li><div class="ag-h"><span class="l">DAY '+(i+1)+' · '+mdLabel(d.date)+' '+wdLabel(d.date)+
+      (d.title?'<b>'+esc(d.title)+'</b>':"")+'</span>'+
+      '<span class="r">'+(v?money(v):"—")+(over?'<span class="overchip">超支</span>':"")+'</span></div>'+
+      (items.length?'<ul class="ag-items">'+items.map(function(s){
+        return '<li><span class="t">'+esc(s.time||"--:--")+'</span><span>'+esc(s.name)+'</span></li>';
+      }).join("")+'</ul>':'<div class="hint">這天沒有安排</div>')+'</li>';
+  }).join("");
+}
+
+/* ---------------- views ---------------- */
+function switchView(v){
+  ["plan","money","fx","cal"].forEach(function(x){ el("v-"+x).hidden=(x!==v); });
+  Array.prototype.forEach.call(document.querySelectorAll(".tabs button"),function(b){
+    b.setAttribute("aria-selected", b.getAttribute("data-view")===v?"true":"false");
+  });
+}
+function renderAll(){
+  renderHeader(); renderPlan(); renderMoney(); renderFx(); renderCal();
+}
+
+/* ---------------- events ---------------- */
+Array.prototype.forEach.call(document.querySelectorAll(".tabs button"),function(b){
+  b.onclick=function(){ switchView(b.getAttribute("data-view")); };
+});
+el("modeTime").onclick=function(){ mapMode=false; renderPlan(); };
+el("modeMap").onclick=function(){ mapMode=true; renderPlan(); };
+
+el("tripName").onchange=function(){ S.name=el("tripName").value||"我的旅程"; S.isSample=false; persist(); renderHeader(); };
+el("addSpot").onclick=function(){ openSpotForm(null); };
+el("sfCancel").onclick=function(){ el("spotFormPanel").hidden=true; };
+el("sfSave").onclick=function(){
+  var d=S.days[curDay]; if(!d) return;
+  var name=el("sfName").value.trim();
+  if(!name){ toast("請填名稱"); return; }
+  var obj={time:el("sfTime").value,name:name,place:el("sfPlace").value.trim(),cat:el("sfCat").value,note:el("sfNote").value.trim()};
+  if(editingSpot){
+    d.spots.forEach(function(s){ if(s.id===editingSpot) Object.assign(s,obj); });
+  } else {
+    obj.id=uid(); d.spots.push(obj);
+  }
+  el("spotFormPanel").hidden=true; editingSpot=null;
+  persist(); renderAll(); toast("已儲存");
+};
+el("addDay").onclick=function(){
+  var last=S.days.length?S.days[S.days.length-1].date:iso(new Date());
+  S.days.push({id:uid(),date:addDays(last,1),title:"",spots:[]});
+  curDay=S.days.length-1; persist(); renderAll();
+};
+el("delDay").onclick=function(){
+  if(S.days.length<=1){ toast("至少要留一天"); return; }
+  S.days.splice(curDay,1);
+  curDay=Math.max(0,curDay-1); persist(); renderAll(); toast("已刪除這天");
+};
+el("openDayRoute").onclick=function(){
+  var d=S.days[curDay]; if(!d) return;
+  var pts=d.spots.slice().sort(function(a,b){ return (a.time||"99:99").localeCompare(b.time||"99:99"); })
+    .map(mapQuery).filter(Boolean);
+  if(!pts.length){ toast("這天還沒有地點"); return; }
+  var url;
+  if(pts.length===1){ url=searchUrl(pts[0]); }
+  else {
+    url="https://www.google.com/maps/dir/?api=1&origin="+encodeURIComponent(pts[0])+
+        "&destination="+encodeURIComponent(pts[pts.length-1]);
+    var mid=pts.slice(1,-1).slice(0,8);
+    if(mid.length) url+="&waypoints="+mid.map(encodeURIComponent).join("%7C");
+    url+="&travelmode=transit";
+  }
+  window.open(url,"_blank","noopener");
+};
+
+el("exAmt").oninput=updateExpPreview;
+el("exCur").onchange=updateExpPreview;
+el("exSave").onclick=function(){
+  var a=parseFloat(el("exAmt").value);
+  if(!isFinite(a)||a<=0){ toast("請輸入金額"); return; }
+  S.expenses.push({
+    id:uid(), date:el("exDate").value||iso(new Date()), amount:a, cur:el("exCur").value,
+    cat:el("exCat").value, payerId:el("exPayer").value,
+    shareIds:(el("exShare")._sel||[]).slice(), note:el("exNote").value.trim()
+  });
+  el("exAmt").value=""; el("exNote").value="";
+  S.isSample=false;
+  persist(); renderAll(); toast("已記一筆");
+};
+el("addMember").onclick=function(){
+  var n=el("newMember").value.trim();
+  if(!n) return;
+  S.members.push({id:uid(),name:n});
+  el("newMember").value="";
+  el("exShare")._sel=null;
+  persist(); renderAll();
+};
+el("bTotal").onchange=function(){ S.budget.total=parseFloat(el("bTotal").value)||0; persist(); renderMoney(); renderCal(); };
+el("bDaily").onchange=function(){ S.budget.daily=parseFloat(el("bDaily").value)||0; persist(); renderMoney(); renderCal(); };
+
+el("fxAmt").oninput=calcFx;
+el("fxFrom").onchange=function(){ S.tripCur=el("fxFrom").value; persist(); calcFx(); };
+el("fxTo").onchange=calcFx;
+el("fxSwap").onclick=function(){
+  var a=el("fxFrom").value; el("fxFrom").value=el("fxTo").value; el("fxTo").value=a; calcFx();
+};
+el("fxUpdate").onclick=updateRates;
+el("fxManualToggle").onclick=function(){ manualRates=!manualRates; renderFx(); };
+
+el("clearSample").onclick=function(){
+  if(!confirm("清空範例資料，開始規劃自己的行程？")) return;
+  S=emptyState(); curDay=0; persist(); renderAll(); toast("已清空，開始規劃吧");
+};
+el("resetBtn").onclick=function(){
+  if(!confirm("這會刪掉所有行程和記帳資料，確定嗎？")) return;
+  S=emptyState(); curDay=0; persist(); renderAll(); toast("已清空");
+};
+el("exportBtn").onclick=function(){
+  var json=JSON.stringify(S,null,2);
+  var fn=String(S.name||"旅程").replace(/[\\\/:*?"<>|\s]+/g,"_")+"-備份.json";
+  try{
+    var a=document.createElement("a");
+    a.href=URL.createObjectURL(new Blob([json],{type:"application/json"}));
+    a.download=fn; a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); },2000);
+    toast("已匯出");
+  }catch(e2){ toast("這個環境不能下載檔案"); }
+};
+el("importBtn").onclick=function(){ el("importFile").click(); };
+el("importFile").onchange=function(){
+  var f=el("importFile").files[0]; if(!f) return;
+  var r=new FileReader();
+  r.onload=function(){
+    try{
+      var j=JSON.parse(r.result);
+      if(!j || !j.days) throw new Error("bad");
+      S=j; S.rates=Object.assign({},BASE_RATES,S.rates||{}); curDay=0;
+      persist(); renderAll(); toast("已匯入備份");
+    }catch(e){ toast("檔案讀不出來，請確認是這個手帳匯出的 JSON"); }
+  };
+  r.readAsText(f);
+  el("importFile").value="";
+};
+
+/* ---------------- boot ---------------- */
+S = loadLocal() || sampleState();
+S.rates = Object.assign({}, BASE_RATES, S.rates||{});
+if(!S.members || !S.members.length) S.members=[{id:uid(),name:"我"}];
+if(!S.days || !S.days.length) S.days=[{id:uid(),date:iso(new Date()),title:"",spots:[]}];
+if(!S.budget) S.budget={total:0,daily:0};
+S.expenses = (S.expenses||[]).filter(function(e){ return e && isFinite(e.amount); });
+renderAll();
+setSync();
+})();
+</script>
+
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function () {
+    navigator.serviceWorker.register("./sw.js").catch(function () {});
+  });
+}
+</script>
+</body>
+</html>

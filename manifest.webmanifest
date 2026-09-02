@@ -1,0 +1,16 @@
+{
+  "name": "隨行手帳",
+  "short_name": "隨行手帳",
+  "description": "旅程行程、記帳分帳、匯率換算與每日行事曆",
+  "lang": "zh-Hant",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#F4F6F2",
+  "theme_color": "#0F6E5C",
+  "icons": [
+    { "src": "./icon.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "./icon.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
