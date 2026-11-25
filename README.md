@@ -1,4 +1,4 @@
-# 隨行手帳
+# ㄆㄆ大王
 
 單頁旅遊工具：每日行程時間軸與地圖、多幣別記帳與分帳、匯率換算、逐日行事曆。
 
@@ -43,7 +43,7 @@
 cd travel-log
 git init
 git add .
-git commit -m "隨行手帳 first version"
+git commit -m "ㄆㄆ大王 first version"
 git branch -M main
 git remote add origin git@github.com:<你的帳號>/travel-log.git
 git push -u origin main
@@ -61,4 +61,6 @@ git push -u origin main
 
 - 清瀏覽器資料、無痕視窗、換裝置都會不見。頁面最下面的「匯出備份 JSON」／「匯入備份」可以搬。
 - 匯率內建一份 2026-09-02 的基準值；按「更新匯率」抓最新的，抓不到可以改成手動輸入。
-- 想從乾淨的狀態開始，按「清空範例，開始規劃」。
+- `index.html` 裡有一份上鎖的預設行程（`PRESET_ENC`，PBKDF2 + AES-GCM 加密）。repo 是公開的，所以只放加密後的內容；打開後輸入密碼才會在自己的瀏覽器解開、存在那台裝置。頁面最下面的「輸入密碼載入行程」可以隨時重新載入。
+- **不要把沒加密的行程 commit 進來**，git 紀錄是公開的，刪掉也查得到。
+- 想從乾淨的狀態開始，按最下面的「全部清空」。

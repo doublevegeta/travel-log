@@ -1,6 +1,6 @@
-/* 隨行手帳 — 離線快取
+/* ㄆㄆ大王 — 離線快取
    改過 index.html 之後，把下面的版本號 +1，重新整理就會拿到新版。 */
-const VERSION = "v1";
+const VERSION = "v2";
 const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icon.png"];
 
 self.addEventListener("install", (e) => {
