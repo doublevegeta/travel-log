@@ -1,6 +1,7 @@
 /* ㄆㄆ大王 — 離線快取
    改過 index.html 之後，把下面的版本號 +1，重新整理就會拿到新版。 */
-const VERSION = "v3";
+const VERSION = "v5";
+const PHOTOS = "pp-photos-1";   // 行程照片另外存，換版本也不會被清掉
 const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icon.png"];
 
 self.addEventListener("install", (e) => {
@@ -12,7 +13,7 @@ self.addEventListener("install", (e) => {
 self.addEventListener("activate", (e) => {
   e.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== VERSION).map((k) => caches.delete(k))))
+      .then((keys) => Promise.all(keys.filter((k) => k !== VERSION && k !== PHOTOS).map((k) => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
@@ -34,6 +35,19 @@ self.addEventListener("fetch", (e) => {
         }).catch(() => hit);
         return hit || fresh;
       })
+    );
+    return;
+  }
+
+  // 行程照片（Wikimedia）：存過就直接用，出國沒網路也看得到
+  if (url.hostname.endsWith("wikimedia.org")) {
+    e.respondWith(
+      caches.open(PHOTOS).then((c) =>
+        c.match(req.url).then((hit) => hit || fetch(req).then((res) => {
+          if (res && res.ok) c.put(req.url, res.clone());
+          return res;
+        }))
+      )
     );
     return;
   }

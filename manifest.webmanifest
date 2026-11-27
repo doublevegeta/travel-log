@@ -1,7 +1,7 @@
 {
   "name": "ㄆㄆ大王",
   "short_name": "ㄆㄆ大王",
-  "description": "旅程行程、記帳分帳、匯率換算與每日行事曆",
+  "description": "旅程行程、圖文行程、旅程資訊與每日行事曆",
   "lang": "zh-Hant",
   "start_url": "./",
   "scope": "./",
@@ -10,7 +10,17 @@
   "background_color": "#FBF4F6",
   "theme_color": "#B8506F",
   "icons": [
-    { "src": "./icon.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "./icon.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    {
+      "src": "./icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ]
 }
